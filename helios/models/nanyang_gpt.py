@@ -50,22 +50,28 @@ class NanyangGPT(nn.Module):
         self.head = nn.Linear(dim, vocab_size, bias=False)
         self.head.weight = self.tok.weight
 
-    def forward(self, ids, targets=None):
+    def forward(self, ids, targets=None, img_emb=None):
         B, T = ids.shape
-        x = self.tok(ids) + self.pos(torch.arange(T, device=ids.device))
+        x = self.tok(ids)
+        if img_emb is not None:
+            # 视觉 token 作为前缀：图片在前，文字在后，共用因果注意力
+            x = torch.cat([img_emb, x], dim=1)
+        x = x + self.pos(torch.arange(x.shape[1], device=ids.device))
         for blk in self.blocks:
             x = blk(x)
         logits = self.head(self.ln(x))
         loss = None
         if targets is not None:
-            loss = F.cross_entropy(logits.reshape(-1, logits.size(-1)), targets.reshape(-1), ignore_index=PAD_ID)
+            lg = logits[:, -targets.shape[1]:] if img_emb is not None else logits
+            loss = F.cross_entropy(lg.reshape(-1, lg.size(-1)), targets.reshape(-1), ignore_index=PAD_ID)
         return logits, loss
 
     @torch.no_grad()
-    def generate(self, ids, max_new=512, temperature=0.8, top_k=50):
+    def generate(self, ids, max_new=512, temperature=0.8, top_k=50, img_emb=None):
         self.eval()
+        n_img = img_emb.shape[1] if img_emb is not None else 0
         for _ in range(max_new):
-            logits, _ = self(ids[:, -self.max_len:])
+            logits, _ = self(ids[:, -(self.max_len - n_img):], img_emb=img_emb)
             logits = logits[:, -1, :] / temperature
             if top_k:
                 v, _ = torch.topk(logits, top_k)
