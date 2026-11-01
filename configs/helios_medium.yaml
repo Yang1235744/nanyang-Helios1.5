@@ -1,11 +1,11 @@
 # nanyang-Helios 1.5 中等模型配置
-# 权重规模：~3B 参数（fp16 约 6 GB）
+# 权重规模：约 1.4B 参数（fp32 约 5.5 GB）
 model_name: nanyang-Helios1.5
 seed: 42
 
 vae:
   in_channels: 3
-  latent_channels: 16         # 1.2 是 8，加大承载高清与长视频细节
+  latent_channels: 16         # 1.2 是 4，加大承载高清与长视频细节
   base_channels: 128          # 中等 VAE
   channel_mults: [1, 2, 4, 4]
   num_res_blocks: 3
@@ -24,20 +24,22 @@ dit:
   heads: 16
   mlp_ratio: 4.0
   patch_size: 2
-  num_frames: 180             # 15 秒 @ 12fps
-  spatial_size: 128           # 1024px / 8
-  use_temporal: true          # 时空解耦注意力（长视频关键）
-  use_cross_attn: true
+  latent_channels: 16
+  max_frames: 180             # 位置表上限：15 秒 @ 12fps
+  max_h: 64                   # 位置表上限：1024px / 8 / patch2
+  max_w: 64
 
 audio:
   sample_rate: 24000
-  hop_length: 480             # 12fps 帧与音频 hop 对齐：24000/480=50fps, 取 2 帧对齐
+  hop_length: 480             # 24000/480 = 50 mel 帧/秒
   n_mels: 128
+  n_fft: 1024
   audio_vae_latent: 8
   audio_vae_base: 96
   audio_dit_dim: 768
   audio_dit_depth: 12
   audio_dit_heads: 12
+  vocoder_iter: 64            # Griffin-Lim 迭代次数
 
 gpt:
   dim: 1024
@@ -47,18 +49,22 @@ gpt:
   vocab_size: 259
 
 train:
-  image_size: 1024
-  num_frames: 180
+  image_size: 1024            # 图片：高清
+  video_size: 256             # 视频：单帧分辨率（15 秒长视频按此分辨率训）
+  num_frames: 180             # 15 秒 @ 12fps
   batch_size: 1
-  num_steps_per_frame: 1000
+  num_steps: 1000
   lr: 1.0e-4
   weight_decay: 0.01
   grad_clip: 1.0
+  caption_dropout: 0.1        # 训练 CFG 的无条件 dropout
+  p_video: 0.5                # 有视频数据时取视频 batch 的概率
   log_every: 20
   save_every: 500
   data_dir: data/images
   video_dir: data/videos
   audio_dir: data/audio
+  corpus_dir: data/corpus
   out_dir: runs/helios15_medium
 
 sample:

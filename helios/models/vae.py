@@ -57,7 +57,9 @@ class VAE(nn.Module):
     def __init__(self, in_channels=3, latent_channels=16, base_channels=128,
                  channel_mults=(1, 2, 4, 4), num_res_blocks=3, downsample_factor=None):
         super().__init__()
-        self.downsample_factor = 2 ** len(channel_mults)
+        # 实际下采样只在相邻层之间发生：4 级通道 → 3 次 stride2 → 8x
+        self.downsample_factor = 2 ** (len(channel_mults) - 1)
+        self.latent_channels = latent_channels
         chs = [base_channels * m for m in channel_mults]
         self.conv_in = nn.Conv2d(in_channels, chs[0], 3, padding=1)
         self.downs = nn.ModuleList([
