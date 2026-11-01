@@ -1,0 +1,68 @@
+# nanyang-Helios 1.5 中等模型配置
+# 权重规模：~3B 参数（fp16 约 6 GB）
+model_name: nanyang-Helios1.5
+seed: 42
+
+vae:
+  in_channels: 3
+  latent_channels: 16         # 1.2 是 8，加大承载高清与长视频细节
+  base_channels: 128          # 中等 VAE
+  channel_mults: [1, 2, 4, 4]
+  num_res_blocks: 3
+  downsample_factor: 8        # 8x 下采样
+
+text:
+  dim: 1024
+  depth: 12
+  heads: 16
+  max_len: 256
+  vocab_size: 259             # 字节级 tokenizer
+
+dit:
+  dim: 1024
+  depth: 24
+  heads: 16
+  mlp_ratio: 4.0
+  patch_size: 2
+  num_frames: 180             # 15 秒 @ 12fps
+  spatial_size: 128           # 1024px / 8
+  use_temporal: true          # 时空解耦注意力（长视频关键）
+  use_cross_attn: true
+
+audio:
+  sample_rate: 24000
+  hop_length: 480             # 12fps 帧与音频 hop 对齐：24000/480=50fps, 取 2 帧对齐
+  n_mels: 128
+  audio_vae_latent: 8
+  audio_vae_base: 96
+  audio_dit_dim: 768
+  audio_dit_depth: 12
+  audio_dit_heads: 12
+
+gpt:
+  dim: 1024
+  depth: 24
+  heads: 16
+  max_len: 2048
+  vocab_size: 259
+
+train:
+  image_size: 1024
+  num_frames: 180
+  batch_size: 1
+  num_steps_per_frame: 1000
+  lr: 1.0e-4
+  weight_decay: 0.01
+  grad_clip: 1.0
+  log_every: 20
+  save_every: 500
+  data_dir: data/images
+  video_dir: data/videos
+  audio_dir: data/audio
+  out_dir: runs/helios15_medium
+
+sample:
+  steps: 50
+  cfg_scale: 5.0
+  fps: 12
+  audio_steps: 50
