@@ -12,6 +12,14 @@
 | 对话 | 捆绑[南阳 GPT](https://github.com/Yang1235744/nanyang-GPT)（已单独开源），先聊天再生成 |
 | 权重规模 | 1.49B 参数 / fp32 约 **5.9 GB** |
 
+## 直接下载（不自己训练）
+
+整套离线包（三仓库源码 + 权重，`.pt` / `.gguf` 双格式）托管在自建 NAS，永久有效、无需注册：
+
+```
+https://share.fnnas.net/s/90de87a72789493597
+```
+
 ## 架构
 
 - `helios/models/vae.py` —— 中等 2D VAE（8x 下采样，16 通道 latent，base 128）
