@@ -1,6 +1,6 @@
 # nanyang-Helios 1.5 —— 中等视频/图片生成模型（含音频 + 南阳 GPT）
 
-从零自研的中等规模多模态生成模型，对标豆包/千问的生成能力。在 [1.2 低等版](https://github.com/Yang1235744/nanyang-Helios1.2) 基础上全面升级。
+从零自研的中等规模多模态生成模型。在 [1.2 低等版](https://github.com/Yang1235744/nanyang-Helios1.2) 基础上全面升级。
 
 ## 能力
 
@@ -81,6 +81,7 @@ python scripts/param_count.py    # 参数量 / 权重体积
 
 - [x] 1.2：低等版，基础图片/短 GIF
 - [x] 1.5：中等版，15s 视频 + 音频 + HD 图片 + 南阳 GPT 捆绑
+- [ ] 1.8：剧情对白与口型同步 —— 南阳 GPT 写台词脚本 → 语音合成对白 → 唇部区域对齐；南阳 GPT 转 GGUF 接入 Ollama 等运行时
 - [ ] 2.0：大规模版，因果 3D VAE、时空分解注意力、EMA、更高分辨率
 
 ## 许可
